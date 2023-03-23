@@ -9,8 +9,13 @@ byte[] data  ;
 try
 {
 	tcp.Start();
+
+    while (true)
+    {
 	using TcpClient client= await tcp.AcceptTcpClientAsync();
+
     await using NetworkStream stream = client.GetStream();
+
     windowSize = stream.ReadByte();
     var message = $"" ;
     if (windowSize != 0)
@@ -32,6 +37,7 @@ try
     await stream.WriteAsync(dateTimeBytes);
     Console.ReadKey();
     Console.WriteLine($"Sent message: \"{message}\"");
+    }
 }
 catch (Exception)
 {
