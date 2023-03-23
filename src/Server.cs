@@ -12,30 +12,24 @@ try
 
 	tcp.Start();
             
-    while (true)
-    {
+     
         
-            await handleClientAsync(await tcp.AcceptTcpClientAsync());
+            await handleClientAsync(await tcp.AcceptTcpClientAsync(),tcp);
         
-    }
+     
 }
 catch (Exception)
 {
 
 	throw;
 }
-finally
-{
-    tcp.Stop();
-}
+ 
 
-  static async Task handleClientAsync(TcpClient client) {
+  static async Task handleClientAsync(TcpClient client, TcpListener tcp) {
     while (true)
     {
-        if(client.Connected)
-        {
-
-    await using NetworkStream stream = client.GetStream();
+       
+     NetworkStream stream = client.GetStream();
 
     var windowSize = stream.ReadByte();
     var message = $"";
@@ -53,9 +47,18 @@ finally
         }
         else
             message += "+PONG\r\n";
-    }
-    var dateTimeBytes = Encoding.UTF8.GetBytes(message);
-    await stream.WriteAsync(dateTimeBytes);
+            Console.WriteLine(message);
+            var dateTimeBytes = Encoding.UTF8.GetBytes(message);
+            await stream.WriteAsync(dateTimeBytes);
         }
+        else
+        {
+
+
+           
+             client.Close();
+            tcp.Stop();
+        }
+        
     }
 }
