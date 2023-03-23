@@ -1,10 +1,26 @@
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
+using System.Text;
 
-// You can use print statements as follows for debugging, they'll be visible when running tests.
-Console.WriteLine("Logs from your program will appear here!");
+var ipAddress = new IPEndPoint(IPAddress.Any, 6379);
+TcpListener tcp = new(ipAddress);
+try
+{
+	tcp.Start();
+	using TcpClient client= await tcp.AcceptTcpClientAsync();
+    await using NetworkStream stream = client.GetStream();
+    var message = $"📅 {DateTime.Now} 🕛";
+    var dateTimeBytes = Encoding.UTF8.GetBytes(message);
+    await stream.WriteAsync(dateTimeBytes);
 
-// Uncomment this block to pass the first stage
-// TcpListener server = new TcpListener(IPAddress.Any, 6379);
-// server.Start();
-// server.AcceptSocket(); // wait for client
+    Console.WriteLine($"Sent message: \"{message}\"");
+}
+catch (Exception)
+{
+
+	throw;
+}
+finally
+{
+    tcp.Stop();
+}
