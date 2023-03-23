@@ -5,8 +5,7 @@ using System.Text;
 var ipAddress = new IPEndPoint(IPAddress.Any, 6379);
 TcpListener tcp = new(ipAddress);
 byte[] data  ;
-string result = "";
-var windowSize = 0;
+ var windowSize = 0;
 try
 {
 	tcp.Start();
