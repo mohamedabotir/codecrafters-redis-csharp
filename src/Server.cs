@@ -12,31 +12,36 @@ try
 
     while (true)
     {
-	using TcpClient client= await tcp.AcceptTcpClientAsync();
 
-    await using NetworkStream stream = client.GetStream();
+          new Thread(async () => {
+              using TcpClient client = await tcp.AcceptTcpClientAsync();
 
-    windowSize = stream.ReadByte();
-    var message = $"" ;
-    if (windowSize != 0)
-    {
+              await using NetworkStream stream = client.GetStream();
 
-    data = new byte[windowSize];
-    await stream.ReadAsync(data);
-      var result = string.Join("",data.ToArray());
-        var splitting = Encoding.UTF8.GetString(data);
-        var length = splitting.Split("\\n").Length;
-        if (length > 1)
-        {
-            message += $"*{length}\r\n+PONG\r\n+PONG\r\n";
-        }
-        else
-        message+= "+PONG\r\n";
-    }
-    var dateTimeBytes = Encoding.UTF8.GetBytes(message);
-    await stream.WriteAsync(dateTimeBytes);
-    Console.ReadKey();
-    Console.WriteLine($"Sent message: \"{message}\"");
+              windowSize = stream.ReadByte();
+              var message = $"";
+              if (windowSize != 0)
+              {
+
+                  data = new byte[windowSize];
+                  await stream.ReadAsync(data);
+                  var result = string.Join("", data.ToArray());
+                  var splitting = Encoding.UTF8.GetString(data);
+                  var length = splitting.Split("\\n").Length;
+                  if (length > 1)
+                  {
+                      message += $"*{length}\r\n+PONG\r\n+PONG\r\n";
+                  }
+                  else
+                      message += "+PONG\r\n";
+              }
+              var dateTimeBytes = Encoding.UTF8.GetBytes(message);
+              await stream.WriteAsync(dateTimeBytes);
+              Console.ReadKey();
+              Console.WriteLine($"Sent message: \"{message}\"");
+              client.Close();
+          }).Start();
+  
     }
 }
 catch (Exception)
