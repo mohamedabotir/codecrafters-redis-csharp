@@ -37,9 +37,7 @@ try
               }
               var dateTimeBytes = Encoding.UTF8.GetBytes(message);
               await stream.WriteAsync(dateTimeBytes);
-              Console.ReadKey();
-              Console.WriteLine($"Sent message: \"{message}\"");
-              client.Close();
+               client.Close();
           }).Start();
   
     }
