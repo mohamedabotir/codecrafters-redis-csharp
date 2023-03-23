@@ -18,8 +18,14 @@ try
 
     data = new byte[windowSize];
     await stream.ReadAsync(data);
-      //result = string.Join(" ", data.ToArray());
-       // message += $"{Encoding.UTF8.GetString(data)}";
+      var result = string.Join("",data.ToArray());
+        var splitting = Encoding.UTF8.GetString(data);
+        var length = splitting.Split("\\n").Length;
+        if (length > 1)
+        {
+            message += $"*{length}\r\n+PONG\r\n+PONG\r\n";
+        }
+        else
         message+= "+PONG\r\n";
     }
     var dateTimeBytes = Encoding.UTF8.GetBytes(message);
