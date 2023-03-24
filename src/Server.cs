@@ -44,10 +44,7 @@ finally
             var dateTimeBytes = Encoding.UTF8.GetBytes(message);
             await stream.WriteAsync(dateTimeBytes);
         }
-        else
-        {
-            client.Close();
-        }
+        
        
         
     }
