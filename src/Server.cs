@@ -56,7 +56,7 @@ finally
     }
     catch (Exception)
         {
-
+        Console.WriteLine("Error");
             throw;
         }
     }
