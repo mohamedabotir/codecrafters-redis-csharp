@@ -3,7 +3,7 @@ using System.Net.Sockets;
 using System.Text;
 
 var ipAddress = new IPEndPoint(IPAddress.Any, 6379);
-TcpListener tcp= new(ipAddress);
+TcpListener tcp = new (ipAddress);
  
  try
 {
@@ -50,7 +50,8 @@ finally
         }
         else
             message += "+PONG\r\n";
-             var dateTimeBytes = Encoding.UTF8.GetBytes(message);
+            Console.WriteLine(message);
+            var dateTimeBytes = Encoding.UTF8.GetBytes(message);
             await stream.WriteAsync(dateTimeBytes);
         }
         else
