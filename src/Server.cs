@@ -7,9 +7,9 @@ TcpListener tcp = new (ipAddress);
  
  try
 {
-     tcp.Start();
     while (true)
     {
+     tcp.Start();
  
         
         Task.Run(async ()=>await handleClientAsync(await tcp.AcceptTcpClientAsync(),tcp));
