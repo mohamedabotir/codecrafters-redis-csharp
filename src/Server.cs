@@ -24,7 +24,7 @@ catch (Exception)
 }
 finally
 {
-    tcp.Stop();
+    //tcp.Stop();
 }
  
 
@@ -54,14 +54,7 @@ finally
             var dateTimeBytes = Encoding.UTF8.GetBytes(message);
             await stream.WriteAsync(dateTimeBytes);
         }
-        else
-        {
-
-
-           
-            client.Close();
-            
-        }
+       
         
     }
 }
