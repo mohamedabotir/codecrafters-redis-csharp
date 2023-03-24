@@ -24,7 +24,7 @@ catch (Exception)
 }
 finally
 {
-    tcp.Stop();
+   // tcp.Stop();
 }
  
 
