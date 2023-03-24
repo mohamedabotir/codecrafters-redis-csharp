@@ -35,8 +35,7 @@ finally
     {
        
      NetworkStream stream = client.GetStream();
-      if (client.Connected)
-        {
+      
     var windowSize = stream.ReadByte();
     var message = $"";
     
@@ -45,13 +44,10 @@ finally
             var dateTimeBytes = Encoding.UTF8.GetBytes(message);
             await stream.WriteAsync(dateTimeBytes);
         }
-        else
-        {
-            client.Close();
-            client.Dispose();
-        }
+         
+     
       
        
-        }
+        
      
 }
