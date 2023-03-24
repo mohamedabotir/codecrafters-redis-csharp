@@ -29,8 +29,7 @@ finally
  
 
   static async Task handleClientAsync(TcpClient client, TcpListener tcp) {
-    while (true)
-    {
+    
        
      NetworkStream stream = client.GetStream();
 
@@ -63,5 +62,5 @@ finally
             
         }
         
-    }
+     
 }
