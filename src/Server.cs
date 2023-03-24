@@ -3,18 +3,18 @@ using System.Net.Sockets;
 using System.Text;
 
 var ipAddress = new IPEndPoint(IPAddress.Any, 6379);
-TcpListener tcp = new(ipAddress);
-byte[] data  ;
- var windowSize = 0;
-List<TcpClient> connectionsPool = new  ();
-try
+TcpListener tcp;
+ 
+ try
 {
-
-	tcp.Start();
-            
-     
+    tcp = new(ipAddress);
+    tcp.Start();
+    while (true)
+    {
+ 
         
-            await handleClientAsync(await tcp.AcceptTcpClientAsync(),tcp);
+        Task.Run(async ()=>await handleClientAsync(await tcp.AcceptTcpClientAsync(),tcp));
+    }
         
      
 }
@@ -56,7 +56,7 @@ catch (Exception)
 
 
            
-             client.Close();
+            client.Close();
             tcp.Stop();
         }
         
