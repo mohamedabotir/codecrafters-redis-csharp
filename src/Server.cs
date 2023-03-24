@@ -36,20 +36,13 @@ finally
 
     var windowSize = stream.ReadByte();
     var message = $"";
-    if (windowSize != 0)
-    {
-
+    
       
             message += "+PONG\r\n";
             var dateTimeBytes = Encoding.UTF8.GetBytes(message);
             await stream.WriteAsync(dateTimeBytes);
-        }
-        else
-        {
-            client.Close();
-            tcp.Stop();
-        }
+      
        
         
-    }
+     
 }
