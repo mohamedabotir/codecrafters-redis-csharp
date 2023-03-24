@@ -29,8 +29,10 @@ finally
  
 
   static async Task handleClientAsync(TcpClient client, TcpListener tcp) {
-    
-       
+
+    while (true)
+    {
+
      NetworkStream stream = client.GetStream();
 
     var windowSize = stream.ReadByte();
@@ -49,16 +51,16 @@ finally
         }
         else
             message += "+PONG\r\n";
-            Console.WriteLine(message);
             var dateTimeBytes = Encoding.UTF8.GetBytes(message);
             await stream.WriteAsync(dateTimeBytes);
         }
         else
         {
 
+            client.Close();
+    }
 
            
-            client.Close();
             
         }
         
