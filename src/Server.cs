@@ -10,10 +10,12 @@ TcpListener tcp = new (ipAddress);
     while (true)
     {
      tcp.Start();
- 
-        
-        Task.Run(async ()=>await handleClientAsync(await tcp.AcceptTcpClientAsync(),tcp));
-    }
+
+        //new Thread(new ThreadStart(async() =>
+        //{
+          Task.Run (async()=>await handleClientAsync(await tcp.AcceptTcpClientAsync()));
+        //})).Start();
+     }
         
      
 }
@@ -28,12 +30,13 @@ finally
 }
  
 
-  static async Task handleClientAsync(TcpClient client, TcpListener tcp) {
+  static async Task handleClientAsync(TcpClient client) {
     while (true)
     {
        
      NetworkStream stream = client.GetStream();
-
+      if (client.Connected)
+        {
     var windowSize = stream.ReadByte();
     var message = $"";
     
@@ -41,6 +44,12 @@ finally
             message += "+PONG\r\n";
             var dateTimeBytes = Encoding.UTF8.GetBytes(message);
             await stream.WriteAsync(dateTimeBytes);
+        }
+        else
+        {
+            client.Close();
+            client.Dispose();
+        }
       
        
         }
