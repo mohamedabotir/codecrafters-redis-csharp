@@ -31,23 +31,18 @@ finally
   static async Task handleClientAsync(TcpClient client, TcpListener tcp) {
     while (true)
     {
-        try
-        {
+       
+     NetworkStream stream = client.GetStream();
 
-        NetworkStream stream = client.GetStream();
-
-        var windowSize = stream.ReadByte();
-        var message = $"";
-
-
-        message += "+PONG\r\n";
-        var dateTimeBytes = Encoding.UTF8.GetBytes(message);
-        await stream.WriteAsync(dateTimeBytes);
-        }catch(Exception ex) {
-            Console.WriteLine(ex.Message);
+    var windowSize = stream.ReadByte();
+    var message = $"";
+    
+      
+            message += "+PONG\r\n";
+            var dateTimeBytes = Encoding.UTF8.GetBytes(message);
+            await stream.WriteAsync(dateTimeBytes);
+      
+       
         }
-
-
-    }
      
 }
