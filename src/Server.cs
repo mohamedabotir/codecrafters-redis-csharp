@@ -3,12 +3,11 @@ using System.Net.Sockets;
 using System.Text;
 
 var ipAddress = new IPEndPoint(IPAddress.Any, 6379);
-TcpListener tcp;
+TcpListener tcp= new(ipAddress);
  
  try
 {
-    tcp = new(ipAddress);
-    tcp.Start();
+     tcp.Start();
     while (true)
     {
  
@@ -22,6 +21,10 @@ catch (Exception)
 {
 
 	throw;
+}
+finally
+{
+    tcp.Stop();
 }
  
 
@@ -57,7 +60,7 @@ catch (Exception)
 
            
             client.Close();
-            tcp.Stop();
+            
         }
         
     }
