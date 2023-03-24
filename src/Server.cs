@@ -39,18 +39,8 @@ finally
     if (windowSize != 0)
     {
 
-       var data = new byte[windowSize];
-        await stream.ReadAsync(data);
-        var result = string.Join("", data.ToArray());
-        var splitting = Encoding.UTF8.GetString(data);
-        var length = splitting.Split("\\n").Length;
-        if (length > 1)
-        {
-            message += $"*{length}\r\n+PONG\r\n+PONG\r\n";
-        }
-        else
+      
             message += "+PONG\r\n";
-            Console.WriteLine(message);
             var dateTimeBytes = Encoding.UTF8.GetBytes(message);
             await stream.WriteAsync(dateTimeBytes);
         }
