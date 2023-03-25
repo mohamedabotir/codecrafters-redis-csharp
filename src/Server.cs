@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
@@ -20,9 +19,9 @@ try
 
 
 }
-catch (Exception ex)
+catch (Exception)
 {
-    Console.WriteLine(ex.Message);   
+
     throw;
 }
 finally
@@ -32,38 +31,35 @@ finally
 
 
 static async Task handleClientAsync(TcpClient client)
-
-{ 
-
-        while (true)
 {
-
-        NetworkStream stream = client.GetStream();
     try
     {
 
 
-        var windowSize = stream.ReadByte();
-        if (windowSize != 0)
+
+        while (true)
         {
 
-            var message = $"";
+            NetworkStream stream = client.GetStream();
+
+            var windowSize = stream.ReadByte();
+            if (windowSize != 0)
+            {
+
+                var message = $"";
 
 
-            message += "+PONG\r\n";
-            var dateTimeBytes = Encoding.UTF8.GetBytes(message);
-            await stream.WriteAsync(dateTimeBytes);
+                message += "+PONG\r\n";
+                var dateTimeBytes = Encoding.UTF8.GetBytes(message);
+                await stream.WriteAsync(dateTimeBytes);
+            }
         }
-    } 
-    catch (Exception ex)
+    }
+    catch (Exception)
     {
-        var dateTimeBytes = Encoding.UTF8.GetBytes("-Error");
-        await stream.WriteAsync(dateTimeBytes);
-            Console.WriteLine(ex.Message);
+
         throw;
-    } 
-}
-        
+    }
 }
 
 
