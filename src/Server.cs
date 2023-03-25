@@ -54,7 +54,7 @@ static async Task handleClientAsync(TcpClient client)
             var dateTimeBytes = Encoding.UTF8.GetBytes(message);
             await stream.WriteAsync(dateTimeBytes);
         }
-    }
+    } 
     catch (Exception ex)
     {
         var dateTimeBytes = Encoding.UTF8.GetBytes("-Error");
