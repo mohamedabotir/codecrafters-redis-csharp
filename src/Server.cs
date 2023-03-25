@@ -55,10 +55,11 @@ static async Task handleClientAsync(TcpClient client)
             await stream.WriteAsync(dateTimeBytes);
         }
     }
-    catch (Exception)
+    catch (Exception ex)
     {
         var dateTimeBytes = Encoding.UTF8.GetBytes("-Error");
         await stream.WriteAsync(dateTimeBytes);
+            Console.WriteLine(ex.Message);
         throw;
     } 
 }
