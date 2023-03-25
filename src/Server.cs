@@ -20,9 +20,9 @@ try
 
 
 }
-catch (Exception)
+catch (Exception ex)
 {
-
+    Console.WriteLine(ex.Message);   
     throw;
 }
 finally
