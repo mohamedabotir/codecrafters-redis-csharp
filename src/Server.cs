@@ -75,7 +75,6 @@ finally
     catch (Exception EX)
         {
         Console.WriteLine("-Error");
-            throw;
         }
     }
          
