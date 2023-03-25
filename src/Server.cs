@@ -40,8 +40,7 @@ finally
         while (true)
         {
             var message = $"";
-            if (client.Connected)
-            {
+            
 
             NetworkStream stream = client.GetStream();
 
@@ -69,7 +68,7 @@ finally
                 var dateTimeBytes = Encoding.UTF8.GetBytes(message);
                 await stream.WriteAsync(dateTimeBytes);
             }
-            }
+            
         }
     }
     catch (Exception EX)
