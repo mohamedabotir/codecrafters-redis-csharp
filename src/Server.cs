@@ -21,8 +21,9 @@ TcpListener tcp = new (ipAddress);
 }
 catch (Exception)
 {
+    Console.WriteLine("-Error");
 
-	throw;
+    throw;
 }
 finally
 {
@@ -38,25 +39,42 @@ finally
 
         while (true)
         {
+            var message = $"";
+            if (client.Connected)
+            {
 
             NetworkStream stream = client.GetStream();
 
             var windowSize = stream.ReadByte();
             if (windowSize != 0)
             {
+                var buffer = new byte[windowSize];
+              await  stream.ReadAsync(buffer);
+                var encoder = Encoding.UTF8.GetString(buffer);
+               var data = string.Join("", encoder.ToArray());
 
-                var message = $"";
-
+                if (data.Contains("ECHO"))
+                {
+                    var index = data.IndexOf("ECHO");
+                    var echoStart = data[index];//+5+4
+                    var INDEX = data.Length - (index + 10);
+                    var echoedMessage = data.Substring(index+10, INDEX);
+                    message += $"+{echoedMessage}";
+                }
+                else
+                {
 
                 message += "+PONG\r\n";
+                }
                 var dateTimeBytes = Encoding.UTF8.GetBytes(message);
                 await stream.WriteAsync(dateTimeBytes);
             }
+            }
         }
     }
-    catch (Exception)
+    catch (Exception EX)
         {
-        Console.WriteLine("Error");
+        Console.WriteLine("-Error");
             throw;
         }
     }
