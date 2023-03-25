@@ -57,7 +57,7 @@ static async Task handleClientAsync(TcpClient client)
     }
     catch (Exception)
     {
-        Console.WriteLine("Error");
+        Console.WriteLine("-Error");
         throw;
     }
 }
