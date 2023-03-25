@@ -39,8 +39,7 @@ static async Task handleClientAsync(TcpClient client)
 
         while (true)
         {
-
-            NetworkStream stream = client.GetStream();
+             NetworkStream stream = client.GetStream();
 
             var windowSize = stream.ReadByte();
             if (windowSize != 0)
@@ -53,12 +52,20 @@ static async Task handleClientAsync(TcpClient client)
                 var dateTimeBytes = Encoding.UTF8.GetBytes(message);
                 await stream.WriteAsync(dateTimeBytes);
             }
+            else
+            {
+                client.Close();
+            }
         }
     }
     catch (Exception)
     {
 
         throw;
+    }finally
+    {
+        client.Close(); 
+        client.Dispose();
     }
 } 
 
