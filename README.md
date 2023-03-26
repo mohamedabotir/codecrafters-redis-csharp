@@ -34,4 +34,4 @@ Note: This section is for stages 2 and beyond.
    to CodeCrafters. Test output will be streamed to your terminal.
 
 # start redis 
-# sync with my repo , try multiple ping   
+# sync with my repo , try multiple ping    
