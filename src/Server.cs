@@ -35,7 +35,10 @@ static async Task handleClientAsync(TcpClient client, IPEndPoint ipAddress)
      
         client.ReceiveTimeout= 5000;
         client.SendTimeout= 5000;
+    try
+    {
 
+   
         while (true)
         {
              NetworkStream stream = client.GetStream();
@@ -68,13 +71,19 @@ static async Task handleClientAsync(TcpClient client, IPEndPoint ipAddress)
                await  stream.WriteAsync(Encoding.UTF8.GetBytes(message));
                 }
             }
-           else
-           client.Connect(ipAddress);
+
 
         }
-    
-    
-   
+    }
+    catch (Exception)
+    {
+        Console.WriteLine("-Error");
+
+        throw;
+    }
+
+
+
 } 
 
 
