@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
@@ -35,13 +36,13 @@ static async Task handleClientAsync(TcpClient client, IPEndPoint ipAddress)
      
         client.ReceiveTimeout= 5000;
         client.SendTimeout= 5000;
-    try
-    {
 
    
         while (true)
         {
              NetworkStream stream = client.GetStream();
+    try
+    {
 
             var windowSize = stream.ReadByte();
             if (windowSize != 0)
@@ -72,16 +73,17 @@ static async Task handleClientAsync(TcpClient client, IPEndPoint ipAddress)
                 }
             }
 
-
-        }
     }
     catch (Exception)
     {
         Console.WriteLine("-Error");
+        await stream.WriteAsync(Encoding.UTF8.GetBytes("-Error"));
 
         throw;
     }
 
+
+        }
 
 
 } 
