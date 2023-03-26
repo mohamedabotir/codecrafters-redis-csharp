@@ -2,7 +2,7 @@
 using System.Net.Sockets;
 using System.Text;
 
-var ipAddress = new IPEndPoint(IPAddress.Any, 6379);
+var ipAddress = new IPEndPoint(IPAddress.Loopback, 6379);
 TcpListener tcp = new(ipAddress);
 
 try
@@ -32,8 +32,7 @@ finally
 
 static async Task handleClientAsync(TcpClient client, IPEndPoint ipAddress)
 {
-    try
-    {
+     
         client.ReceiveTimeout= 5000;
         client.SendTimeout= 5000;
 
@@ -57,30 +56,25 @@ static async Task handleClientAsync(TcpClient client, IPEndPoint ipAddress)
                     var echoStart = data[index];//+5+4
                     var INDEX = data.Length - (index + 10);
                     var echoedMessage = data.Substring(index + 10, INDEX);
-                    message += $"+{echoedMessage}";
+              var result =   echoedMessage.Replace("\r\n", "").Replace("\0","");
+                    message += $"${result.Length}\r\n{result}\r\n";
+                    await stream.WriteAsync(Encoding.UTF8.GetBytes(message));
+
                 }
                 else
+                {
 
                 message += "+PONG\r\n";
-                var dateTimeBytes = Encoding.UTF8.GetBytes(message);
-              await  stream.WriteAsync(dateTimeBytes);
+               await  stream.WriteAsync(Encoding.UTF8.GetBytes(message));
+                }
             }
            else
            client.Connect(ipAddress);
 
         }
-    }
-    catch (Exception)
-    {
-        client.Connect(ipAddress);
-
-
-    }
-    finally
-    {
-        client.Close(); 
-        client.Dispose();
-    }
+    
+    
+   
 } 
 
 
