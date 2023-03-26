@@ -51,7 +51,7 @@ static async Task handleClientAsync(TcpClient client)
 
                 message += "+PONG\r\n";
                 var dateTimeBytes = Encoding.UTF8.GetBytes(message);
-             stream.Write(dateTimeBytes);
+              await  stream.WriteAsync(dateTimeBytes);
             }
            
         }
