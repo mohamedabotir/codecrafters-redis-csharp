@@ -1,15 +1,16 @@
-﻿using System.Net;
+﻿ 
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-var ipAddress = new IPEndPoint(IPAddress.Any, 6379);
+var ipAddress = new IPEndPoint(IPAddress.Loopback, 6379);
 TcpListener tcp = new(ipAddress);
 
 try
 {
+        tcp.Start();
     while (true)
     {
-        tcp.Start();
 
         //new Thread(new ThreadStart(async() =>
         //{
