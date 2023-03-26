@@ -79,7 +79,7 @@ static async Task handleClientAsync(TcpClient client, IPEndPoint ipAddress)
         Console.WriteLine("-Error");
         await stream.WriteAsync(Encoding.UTF8.GetBytes("-Error"));
 
-        throw;
+        throw; 
     }
 
 
