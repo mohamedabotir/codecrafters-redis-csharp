@@ -13,7 +13,7 @@ try
 
         //new Thread(new ThreadStart(async() =>
         //{
-        Task.Run(async () => await handleClientAsync(await tcp.AcceptTcpClientAsync()));
+        Task.Run(async () => await handleClientAsync(await tcp.AcceptTcpClientAsync(),ipAddress));
         //})).Start();
     }
 
@@ -30,13 +30,12 @@ finally
 }
 
 
-static async Task handleClientAsync(TcpClient client)
+static async Task handleClientAsync(TcpClient client, IPEndPoint ipAddress)
 {
     try
     {
-        client.ReceiveTimeout= 0;
-        client.SendTimeout= 0;
-
+        client.ReceiveTimeout= 5000;
+        client.SendTimeout= 5000;
 
         while (true)
         {
@@ -66,14 +65,18 @@ static async Task handleClientAsync(TcpClient client)
                 var dateTimeBytes = Encoding.UTF8.GetBytes(message);
               await  stream.WriteAsync(dateTimeBytes);
             }
-           
+           else
+           client.Connect(ipAddress);
+
         }
     }
     catch (Exception)
     {
+        client.Connect(ipAddress);
 
-        throw;
-    }finally
+
+    }
+    finally
     {
         client.Close(); 
         client.Dispose();
