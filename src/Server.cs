@@ -34,7 +34,7 @@ static async Task handleClientAsync(TcpClient client)
 {
     try
     {
-
+        client.ReceiveTimeout= 2000;
 
 
         while (true)
