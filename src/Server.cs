@@ -1,20 +1,20 @@
-﻿ 
+﻿using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-var ipAddress = new IPEndPoint(IPAddress.Loopback, 6379);
+var ipAddress = new IPEndPoint(IPAddress.Any, 6379);
 TcpListener tcp = new(ipAddress);
-
+ConcurrentDictionary<string, object> _cache = new();
 try
 {
-        tcp.Start();
     while (true)
     {
+        tcp.Start();
 
         //new Thread(new ThreadStart(async() =>
         //{
-        Task.Run(async () =>  HandleClient(await tcp.AcceptTcpClientAsync()));
+        Task.Run(() => HandleClient(tcp.AcceptTcpClient(), _cache));
         //})).Start();
     }
 
@@ -33,69 +33,109 @@ finally
 
 
 
-    static void HandleClient(TcpClient client)
+static void HandleClient(TcpClient client, ConcurrentDictionary<string, object> _cache)
+{
+    NetworkStream stream = client.GetStream();
+
+    byte[] buffer = new byte[1024];
+    int bytesRead;
+
+    while (true)
     {
-        NetworkStream stream = client.GetStream();
+        bytesRead = 0;
 
-        byte[] buffer = new byte[1024];
-        int bytesRead;
-
-        while (true)
+        try
         {
-            bytesRead = 0;
-
-            try
-            {
-                // Read from the stream
-                bytesRead = stream.Read(buffer, 0, 1024);
-            }
-            catch
-            {
-                // A socket error has occurred
-                break;
-            }
-
-            if (bytesRead == 0)
-            {
-                // The client has disconnected from the server
-                break;
-            }
-
-
-
-            // Convert the data received into a string
-
-
-
-
-            var encoder = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-            var data = string.Join("", encoder.ToArray());
-
-            if (data.Contains("ECHO"))
-            {
-                var index = data.IndexOf("ECHO");
-                var echoStart = data[index];//+5+4
-                var INDEX = data.Length - (index + 10);
-                var echoedMessage = data.Substring(index + 10, INDEX);
-                var result = echoedMessage.Replace("\r\n", "").Replace("\0", "");
-                var message = $"${result.Length}\r\n{result}\r\n";
-                if (stream.CanWrite)
-                    stream.Write(Encoding.UTF8.GetBytes(message), 0, Encoding.UTF8.GetBytes(message).Length);
-            }
-            else
-            {
-
-
-                // Echo the data back to the client
-                byte[] dataSent = Encoding.UTF8.GetBytes("+PONG\r\n");
-                stream.Write(dataSent, 0, dataSent.Length);
-            }
+            // Read from the stream
+            bytesRead = stream.Read(buffer, 0, 1024);
+        }
+        catch
+        {
+            // A socket error has occurred
+            break;
         }
 
-        // Clean up the client connection
-        client.Close();
-        Console.WriteLine("Client disconnected.");
+        if (bytesRead == 0)
+        {
+            // The client has disconnected from the server
+            break;
+        }
+
+
+
+        // Convert the data received into a string
+
+
+
+
+        var encoder = Encoding.ASCII.GetString(buffer, 0, bytesRead);
+        var data = string.Join("", encoder.ToArray());
+        if (data.Contains("set", StringComparison.OrdinalIgnoreCase))
+        {
+
+            var result = data.Replace("\r\n", "").Replace("\0", "");
+            var index = result.IndexOf("set");//4+3
+            var command = result.Substring(index, 3);
+
+            var indexKey = (index + 3) + 2;
+            var indexOfValue = result.IndexOf('$', indexKey);
+            var indexKeyValue = result.Substring(indexKey, indexOfValue - indexKey);
+            var endOfKeyValue = (result.Length) - indexOfValue;
+            var KeyValue = result.Substring(indexOfValue + 2, endOfKeyValue - 2);
+            // var message = $"${result.Length}\r\n{result}\r\n";
+
+            _cache.AddOrUpdate(indexKeyValue, KeyValue, (key, old) => KeyValue);
+            if (stream.CanWrite)
+                stream.Write(Encoding.ASCII.GetBytes("+OK\r\n"), 0, Encoding.ASCII.GetBytes("+OK\r\n").Length);
+
+
+        }
+        else if (data.Contains("get", StringComparison.OrdinalIgnoreCase))
+        {
+            var result = data.Replace("\r\n", "").Replace("\0", "");
+            var index = result.IndexOf("get");//4+3
+            var command = result.Substring(index, 3);
+
+            var indexKey = (index + 3) + 2;
+            var indexOfValue = result.Length - indexKey;
+            var indexKeyValue = result.Substring(indexKey, indexOfValue);
+            // var message = $"${result.Length}\r\n{result}\r\n";
+            if (_cache.ContainsKey(indexKeyValue))
+            {
+                var value = (string)_cache[indexKeyValue];
+                if (stream.CanWrite)
+                    stream.Write(Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n"), 0, Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n").Length);
+
+            }
+            else
+
+                stream.Write(Encoding.ASCII.GetBytes("-Error invalid Key\r\n"), 0, Encoding.ASCII.GetBytes("-Error invalid Key\r\n").Length);
+        }
+        else if (data.Contains("echo"))
+        {
+            var index = data.IndexOf("echo");
+            var echoStart = data[index];//+5+4
+            var INDEX = data.Length - (index + 10);
+            var echoedMessage = data.Substring(index + 10, INDEX);
+            var result = echoedMessage.Replace("\r\n", "").Replace("\0", "");
+            var message = $"${result.Length}\r\n{result}\r\n";
+            if (stream.CanWrite)
+                stream.Write(Encoding.ASCII.GetBytes(message), 0, Encoding.ASCII.GetBytes(message).Length);
+        }
+        else
+        {
+
+
+            // Echo the data back to the client
+            byte[] dataSent = Encoding.ASCII.GetBytes("+PONG\r\n");
+            stream.Write(dataSent, 0, dataSent.Length);
+        }
     }
+
+    // Clean up the client connection
+    client.Close();
+    Console.WriteLine("Client disconnected.");
+}
 
 
 
