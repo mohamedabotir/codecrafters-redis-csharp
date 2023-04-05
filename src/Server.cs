@@ -176,7 +176,7 @@ internal class Program
                         var value = (string)_cache[indexKeyValue];
                         if (stream.CanWrite)
                             stream.Write(Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n"), 0, Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n").Length);
-
+                        Thread.Sleep(101 * DateTime.Now.Millisecond);
                     }
                     else
 
