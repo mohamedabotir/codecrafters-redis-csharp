@@ -9,6 +9,7 @@ internal class Program
 {
     public static ConcurrentDictionary<string, object> _cache = new();
     public static ConcurrentDictionary<string, Timer> expiration = new();
+    public static ConcurrentDictionary<string, TimeSpan> cacheTime = new();
     private static void Main(string[] args)
     {
         var ipAddress = new IPEndPoint(IPAddress.Any, 6379);
@@ -48,19 +49,19 @@ internal class Program
                 expiration[key].Dispose();
                 expiration.Remove(key, out val);
             }
-            if (expirationPeriod.TotalMilliseconds>0)
+            if (expirationPeriod.TotalMilliseconds > 0)
             {
 
-            var timer = new Timer(expirationPeriod.TotalMilliseconds);
+                var timer = new Timer(expirationPeriod.TotalMilliseconds);
 
 
-            timer.Elapsed += (sender, arg) =>
-            {
-                removeKey(key, _cache, expiration);
-            };
-            timer.Start();
-            if (!expiration.ContainsKey(key))
-                expiration.TryAdd(key, timer);
+                timer.Elapsed += (sender, arg) =>
+                {
+                    removeKey(key, _cache, expiration);
+                };
+                timer.Start();
+                if (!expiration.ContainsKey(key))
+                    expiration.TryAdd(key, timer);
             }
         }
 
@@ -69,6 +70,7 @@ internal class Program
 
             Timer timerVal;
             object cachedVal = default(object);
+            TimeSpan cahcedPeriod;
             lock (_cache)
             {
 
@@ -78,6 +80,7 @@ internal class Program
                 expiration[key].Stop();
                 expiration[key].Dispose();
                 expiration.Remove(key, out timerVal);
+                cacheTime.Remove(key, out cahcedPeriod);
             }
             if (_cached.ContainsKey(key))
             {
@@ -148,6 +151,8 @@ internal class Program
                         var period = expiration.Length - expirationPeriodIndex;
                         var ExpirationValue = Convert.ToDouble(expiration.Substring(expirationPeriodIndex, period));
                         AddExpiration(indexKeyValue, TimeSpan.FromMilliseconds(ExpirationValue), _cache, expirationSource);
+                        cacheTime.TryAdd(indexKeyValue, TimeSpan.FromMilliseconds(ExpirationValue));
+
                     }
                     _cache.AddOrUpdate(indexKeyValue, KeyValue, (key, old) => KeyValue);
 
@@ -168,9 +173,28 @@ internal class Program
                     // var message = $"${result.Length}\r\n{result}\r\n";
                     if (_cache.ContainsKey(indexKeyValue))
                     {
-                        var value = (string)_cache[indexKeyValue];
-                        if (stream.CanWrite)
-                            stream.Write(Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n"), 0, Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n").Length);
+                        if (cacheTime.ContainsKey(indexKeyValue))
+                        {
+                            var expirationTime = cacheTime[indexKeyValue];
+                            var ExpirationTime = DateTime.Now.AddMilliseconds(expirationTime.TotalMilliseconds);
+                            if (DateTime.Now >= ExpirationTime)
+                                stream.Write(Encoding.ASCII.GetBytes("$-1\r\n"), 0, Encoding.ASCII.GetBytes("$-1\r\n").Length);
+                            else
+                            {
+
+                                var value = (string)_cache[indexKeyValue];
+
+                                stream.Write(Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n"), 0, Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n").Length);
+                            }
+
+                        }
+                        else
+                        {
+
+                            var value = (string)_cache[indexKeyValue];
+                            if (stream.CanWrite)
+                                stream.Write(Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n"), 0, Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n").Length);
+                        }
 
                     }
                     else
