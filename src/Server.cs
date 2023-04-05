@@ -49,7 +49,7 @@ internal class Program
                 expiration.Remove(key, out val);
             }
 
-            var timer = new Timer(expirationPeriod.TotalSeconds);
+            var timer = new Timer(expirationPeriod.TotalMilliseconds);
 
 
             timer.Elapsed += (sender, arg) =>
@@ -63,22 +63,22 @@ internal class Program
 
         static void removeKey(string key, ConcurrentDictionary<string, object> _cache, ConcurrentDictionary<string, Timer> expiration)
         {
-             
-                Timer timerVal;
-                object cachedVal = default(object);
-                if (expiration.ContainsKey(key))
-                {
-                    expiration[key].Stop();
-                    expiration[key].Dispose();
-                    expiration.Remove(key, out timerVal);
-                }
-                if (_cache.ContainsKey(key))
-                {
-                    _cache.Remove(key, out cachedVal);
-                }
 
-                Console.WriteLine($"{key} EXpired and deleted {cachedVal}");
-             
+            Timer timerVal;
+            object cachedVal = default(object);
+            if (expiration.ContainsKey(key))
+            {
+                expiration[key].Stop();
+                expiration[key].Dispose();
+                expiration.Remove(key, out timerVal);
+            }
+            if (_cache.ContainsKey(key))
+            {
+                _cache.Remove(key, out cachedVal);
+            }
+
+            Console.WriteLine($"{key} EXpired and deleted {cachedVal}");
+
 
         }
 
@@ -141,7 +141,7 @@ internal class Program
                         var expirationPeriodIndex = expiration.IndexOf("x", StringComparison.OrdinalIgnoreCase) + 3;
                         var period = expiration.Length - expirationPeriodIndex;
                         var ExpirationValue = Convert.ToInt32(expiration.Substring(expirationPeriodIndex, period));
-                        AddExpiration(indexKeyValue, TimeSpan.FromSeconds(ExpirationValue), _cache, expirationSource);
+                        AddExpiration(indexKeyValue, TimeSpan.FromMilliseconds(ExpirationValue), _cache, expirationSource);
                     }
                     _cache.AddOrUpdate(indexKeyValue, KeyValue, (key, old) => KeyValue);
 
