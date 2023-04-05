@@ -138,14 +138,14 @@ internal class Program
                     if (expirationSegmentIndex != -1)
                     {
 
-                    var expiration = KeyWithExpirationValue.Substring(expirationSegmentIndex + 2, KeyWithExpirationValue.Length - (expirationSegmentIndex + 2));
-                    var expirationPeriodIndex = expiration.IndexOf("x", StringComparison.OrdinalIgnoreCase) + 3;
-                    var period = expiration.Length - expirationPeriodIndex;
-                    var ExpirationValue = Convert.ToInt32(expiration.Substring(expirationPeriodIndex, period));
-                    AddExpiration(indexKeyValue, TimeSpan.FromSeconds(ExpirationValue), _cache, expirationSource);
+                        var expiration = KeyWithExpirationValue.Substring(expirationSegmentIndex + 2, KeyWithExpirationValue.Length - (expirationSegmentIndex + 2));
+                        var expirationPeriodIndex = expiration.IndexOf("x", StringComparison.OrdinalIgnoreCase) + 3;
+                        var period = expiration.Length - expirationPeriodIndex;
+                        var ExpirationValue = Convert.ToInt32(expiration.Substring(expirationPeriodIndex, period));
+                        AddExpiration(indexKeyValue, TimeSpan.FromSeconds(ExpirationValue), _cache, expirationSource);
                     }
                     _cache.AddOrUpdate(indexKeyValue, KeyValue, (key, old) => KeyValue);
-                  
+
                     if (stream.CanWrite)
                         stream.Write(Encoding.ASCII.GetBytes("+OK\r\n"), 0, Encoding.ASCII.GetBytes("+OK\r\n").Length);
 
@@ -170,7 +170,8 @@ internal class Program
                     }
                     else
 
-                        stream.Write(Encoding.ASCII.GetBytes("-Error invalid Key\r\n"), 0, Encoding.ASCII.GetBytes("-Error invalid Key\r\n").Length);
+                        //stream.Write(Encoding.ASCII.GetBytes("-Error invalid Key\r\n"), 0, Encoding.ASCII.GetBytes("-Error invalid Key\r\n").Length); 
+                        stream.Write(Encoding.ASCII.GetBytes("$-1\r\n"), 0, Encoding.ASCII.GetBytes("$-1\r\n").Length);
                 }
                 else if (data.Contains("echo"))
                 {
