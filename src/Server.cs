@@ -48,6 +48,8 @@ internal class Program
                 expiration[key].Dispose();
                 expiration.Remove(key, out val);
             }
+            if (expirationPeriod.TotalMilliseconds>0)
+            {
 
             var timer = new Timer(expirationPeriod.TotalMilliseconds);
 
@@ -59,25 +61,29 @@ internal class Program
             timer.Start();
             if (!expiration.ContainsKey(key))
                 expiration.TryAdd(key, timer);
+            }
         }
 
-        static void removeKey(string key, ConcurrentDictionary<string, object> _cache, ConcurrentDictionary<string, Timer> expiration)
+        static void removeKey(string key, ConcurrentDictionary<string, object> _cached, ConcurrentDictionary<string, Timer> expiration)
         {
 
             Timer timerVal;
             object cachedVal = default(object);
+            lock (_cache)
+            {
+
+            }
             if (expiration.ContainsKey(key))
             {
                 expiration[key].Stop();
                 expiration[key].Dispose();
                 expiration.Remove(key, out timerVal);
             }
-            if (_cache.ContainsKey(key))
+            if (_cached.ContainsKey(key))
             {
-                _cache.Remove(key, out cachedVal);
+                _cached.Remove(key, out cachedVal);
             }
 
-            Console.WriteLine($"{key} EXpired and deleted {cachedVal}");
 
 
         }
@@ -140,7 +146,7 @@ internal class Program
                         var expiration = KeyWithExpirationValue.Substring(expirationSegmentIndex + 2, KeyWithExpirationValue.Length - (expirationSegmentIndex + 2));
                         var expirationPeriodIndex = expiration.IndexOf("x", StringComparison.OrdinalIgnoreCase) + 3;
                         var period = expiration.Length - expirationPeriodIndex;
-                        var ExpirationValue = Convert.ToInt32(expiration.Substring(expirationPeriodIndex, period));
+                        var ExpirationValue = Convert.ToDouble(expiration.Substring(expirationPeriodIndex, period));
                         AddExpiration(indexKeyValue, TimeSpan.FromMilliseconds(ExpirationValue), _cache, expirationSource);
                     }
                     _cache.AddOrUpdate(indexKeyValue, KeyValue, (key, old) => KeyValue);
