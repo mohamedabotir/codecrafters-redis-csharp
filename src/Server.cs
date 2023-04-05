@@ -173,29 +173,9 @@ internal class Program
                     // var message = $"${result.Length}\r\n{result}\r\n";
                     if (_cache.ContainsKey(indexKeyValue))
                     {
-                        if (cacheTime.ContainsKey(indexKeyValue))
-                        {
-                            Console.WriteLine(indexKeyValue);
-                            var expirationTime = cacheTime[indexKeyValue];
-                            var ExpirationTime = DateTime.Now.AddMilliseconds(expirationTime.TotalMilliseconds);
-                            if (DateTime.Now < ExpirationTime)
-                                stream.Write(Encoding.ASCII.GetBytes("$-1\r\n"), 0, Encoding.ASCII.GetBytes("$-1\r\n").Length);
-                            else
-                            {
-
-                                var value = (string)_cache[indexKeyValue];
-
-                                stream.Write(Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n"), 0, Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n").Length);
-                            }
-
-                        }
-                        else
-                        {
-
-                            var value = (string)_cache[indexKeyValue];
-                            if (stream.CanWrite)
-                                stream.Write(Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n"), 0, Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n").Length);
-                        }
+                        var value = (string)_cache[indexKeyValue];
+                        if (stream.CanWrite)
+                            stream.Write(Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n"), 0, Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n").Length);
 
                     }
                     else
