@@ -63,23 +63,22 @@ internal class Program
 
         static void removeKey(string key, ConcurrentDictionary<string, object> _cache, ConcurrentDictionary<string, Timer> expiration)
         {
-            lock (_cache)
-            {
+             
                 Timer timerVal;
                 object cachedVal = default(object);
-                if (_cache.ContainsKey(key))
-                {
-                    _cache.Remove(key, out cachedVal);
-                }
-
                 if (expiration.ContainsKey(key))
                 {
                     expiration[key].Stop();
                     expiration[key].Dispose();
                     expiration.Remove(key, out timerVal);
                 }
+                if (_cache.ContainsKey(key))
+                {
+                    _cache.Remove(key, out cachedVal);
+                }
+
                 Console.WriteLine($"{key} EXpired and deleted {cachedVal}");
-            }
+             
 
         }
 
