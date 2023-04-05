@@ -177,7 +177,7 @@ internal class Program
                         {
                             var expirationTime = cacheTime[indexKeyValue];
                             var ExpirationTime = DateTime.Now.AddMilliseconds(expirationTime.TotalMilliseconds);
-                            if (DateTime.Now >= ExpirationTime)
+                            if (DateTime.Now <= ExpirationTime)
                                 stream.Write(Encoding.ASCII.GetBytes("$-1\r\n"), 0, Encoding.ASCII.GetBytes("$-1\r\n").Length);
                             else
                             {
