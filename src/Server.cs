@@ -171,6 +171,9 @@ internal class Program
                     var indexOfValue = result.Length - indexKey;
                     var indexKeyValue = result.Substring(indexKey, indexOfValue);
                     // var message = $"${result.Length}\r\n{result}\r\n";
+                    lock (_cache)
+                    {
+
                     if (_cache.ContainsKey(indexKeyValue))
                     {
                         var value = (string)_cache[indexKeyValue];
@@ -181,6 +184,7 @@ internal class Program
 
                         //stream.Write(Encoding.ASCII.GetBytes("-Error invalid Key\r\n"), 0, Encoding.ASCII.GetBytes("-Error invalid Key\r\n").Length); 
                         stream.Write(Encoding.ASCII.GetBytes("$-1\r\n"), 0, Encoding.ASCII.GetBytes("$-1\r\n").Length);
+                    }
                 }
                 else if (data.Contains("echo"))
                 {
