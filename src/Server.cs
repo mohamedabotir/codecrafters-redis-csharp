@@ -185,7 +185,7 @@ internal class Program
 
                             //stream.Write(Encoding.ASCII.GetBytes("-Error invalid Key\r\n"), 0, Encoding.ASCII.GetBytes("-Error invalid Key\r\n").Length); 
                             stream.Write(Encoding.ASCII.GetBytes("$-1\r\n"), 0, Encoding.ASCII.GetBytes("$-1\r\n").Length);
-                        Task.Delay(50);
+                        System.Threading.Thread.Sleep(TimeSpan.FromSeconds(1000));
                     }
                 }
                 else if (data.Contains("echo"))
