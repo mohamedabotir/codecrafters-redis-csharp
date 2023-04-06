@@ -150,7 +150,7 @@ internal class Program
                         var expirationPeriodIndex = expiration.IndexOf("x", StringComparison.OrdinalIgnoreCase) + 3;
                         var period = expiration.Length - expirationPeriodIndex;
                         var ExpirationValue = Convert.ToDouble(expiration.Substring(expirationPeriodIndex, period));
-                        AddExpiration(indexKeyValue, TimeSpan.FromMilliseconds(ExpirationValue), _cache, expirationSource);
+                        AddExpiration(indexKeyValue, TimeSpan.FromMilliseconds(ExpirationValue));
                         cacheTime.TryAdd(indexKeyValue, TimeSpan.FromMilliseconds(ExpirationValue));
 
                     }
