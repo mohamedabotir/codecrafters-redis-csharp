@@ -39,7 +39,7 @@ internal class Program
         }
 
 
-        static void AddExpiration(string key, TimeSpan expirationPeriod, ConcurrentDictionary<string, object> _cache, ConcurrentDictionary<string, Timer> expiration)
+        static void AddExpiration(string key, TimeSpan expirationPeriod)
         {
             Timer val;
             if (expiration.ContainsKey(key))
@@ -57,7 +57,7 @@ internal class Program
 
                 timer.Elapsed += (sender, arg) =>
                 {
-                    removeKey(key, _cache, expiration);
+                    removeKey(key);
                 };
                 timer.Start();
                 if (!expiration.ContainsKey(key))
@@ -65,7 +65,7 @@ internal class Program
             }
         }
 
-        static void removeKey(string key, ConcurrentDictionary<string, object> _cached, ConcurrentDictionary<string, Timer> expiration)
+        static void removeKey(string key)
         {
 
             Timer timerVal;
@@ -82,9 +82,9 @@ internal class Program
                 expiration.Remove(key, out timerVal);
                 cacheTime.Remove(key, out cahcedPeriod);
             }
-            if (_cached.ContainsKey(key))
+            if (_cache.ContainsKey(key))
             {
-                _cached.Remove(key, out cachedVal);
+                _cache.Remove(key, out cachedVal);
             }
 
 
@@ -174,16 +174,18 @@ internal class Program
                     lock (_cache)
                     {
 
-                    if (_cache.ContainsKey(indexKeyValue))
-                    {
-                        var value = (string)_cache[indexKeyValue];
-                        if (stream.CanWrite)
-                            stream.Write(Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n"), 0, Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n").Length);
-                    }
-                    else
+                        if (_cache.ContainsKey(indexKeyValue))
+                        {
+                            var value = (string)_cache[indexKeyValue];
+                            if (stream.CanWrite)
+                                stream.Write(Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n"), 0, Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n").Length);
 
-                        //stream.Write(Encoding.ASCII.GetBytes("-Error invalid Key\r\n"), 0, Encoding.ASCII.GetBytes("-Error invalid Key\r\n").Length); 
-                        stream.Write(Encoding.ASCII.GetBytes("$-1\r\n"), 0, Encoding.ASCII.GetBytes("$-1\r\n").Length);
+                        }
+                        else
+
+                            //stream.Write(Encoding.ASCII.GetBytes("-Error invalid Key\r\n"), 0, Encoding.ASCII.GetBytes("-Error invalid Key\r\n").Length); 
+                            stream.Write(Encoding.ASCII.GetBytes("$-1\r\n"), 0, Encoding.ASCII.GetBytes("$-1\r\n").Length);
+                        Task.Delay(50);
                     }
                 }
                 else if (data.Contains("echo"))
