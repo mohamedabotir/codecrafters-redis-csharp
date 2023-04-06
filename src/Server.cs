@@ -40,7 +40,7 @@ internal class Program
 
         static void AddExpiration(string key, TimeSpan expirationPeriod)
         {
-            cacheTime.TryAdd(key, DateTime.Now.AddMilliseconds(expirationPeriod.TotalSeconds));
+            cacheTime.TryAdd(key, DateTime.Now.AddMilliseconds(expirationPeriod.TotalMilliseconds));
         }
 
 
@@ -138,9 +138,9 @@ internal class Program
                             }
                             else
                             {
-                                var value = (string)_cache[indexKeyValue];
-                                if (stream.CanWrite)
-                                    stream.Write(Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n"), 0, Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n").Length);
+var value = (string)_cache[indexKeyValue];
+                                    if (stream.CanWrite)
+                                        stream.Write(Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n"), 0, Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n").Length);
 
                             }
 
