@@ -8,8 +8,7 @@ using Timer = System.Timers.Timer;
 internal class Program
 {
     public static ConcurrentDictionary<string, object> _cache = new();
-    public static ConcurrentDictionary<string, Timer> expiration = new();
-    public static ConcurrentDictionary<string, TimeSpan> cacheTime = new();
+    public static ConcurrentDictionary<string, DateTime> cacheTime = new();
     private static void Main(string[] args)
     {
         var ipAddress = new IPEndPoint(IPAddress.Any, 6379);
@@ -22,7 +21,7 @@ internal class Program
 
                 //new Thread(new ThreadStart(async() =>
                 //{
-                Task.Run(() => HandleClient(tcp.AcceptTcpClient(), _cache, expiration));
+                Task.Run(() => HandleClient(tcp.AcceptTcpClient(), _cache));
                 //})).Start();
             }
 
@@ -41,57 +40,11 @@ internal class Program
 
         static void AddExpiration(string key, TimeSpan expirationPeriod)
         {
-            Timer val;
-            if (expiration.ContainsKey(key))
-            {
-
-                expiration[key].Stop();
-                expiration[key].Dispose();
-                expiration.Remove(key, out val);
-            }
-            if (expirationPeriod.TotalMilliseconds > 0)
-            {
-
-                var timer = new Timer(expirationPeriod.TotalMilliseconds);
-
-
-                timer.Elapsed += (sender, arg) =>
-                {
-                    removeKey(key);
-                };
-                timer.Start();
-                if (!expiration.ContainsKey(key))
-                    expiration.TryAdd(key, timer);
-            }
+            cacheTime.TryAdd(key, DateTime.Now.AddMilliseconds(expirationPeriod.TotalSeconds));
         }
 
-        static void removeKey(string key)
-        {
 
-            Timer timerVal;
-            object cachedVal = default(object);
-            TimeSpan cahcedPeriod;
-            lock (_cache)
-            {
-
-            }
-            if (expiration.ContainsKey(key))
-            {
-                expiration[key].Stop();
-                expiration[key].Dispose();
-                expiration.Remove(key, out timerVal);
-                cacheTime.Remove(key, out cahcedPeriod);
-            }
-            if (_cache.ContainsKey(key))
-            {
-                _cache.Remove(key, out cachedVal);
-            }
-
-
-
-        }
-
-        static void HandleClient(TcpClient client, ConcurrentDictionary<string, object> _cache, ConcurrentDictionary<string, Timer> expirationSource)
+        static void HandleClient(TcpClient client, ConcurrentDictionary<string, object> _cache)
         {
             NetworkStream stream = client.GetStream();
 
@@ -151,7 +104,6 @@ internal class Program
                         var period = expiration.Length - expirationPeriodIndex;
                         var ExpirationValue = Convert.ToDouble(expiration.Substring(expirationPeriodIndex, period));
                         AddExpiration(indexKeyValue, TimeSpan.FromMilliseconds(ExpirationValue));
-                        cacheTime.TryAdd(indexKeyValue, TimeSpan.FromMilliseconds(ExpirationValue));
 
                     }
                     _cache.AddOrUpdate(indexKeyValue, KeyValue, (key, old) => KeyValue);
@@ -173,18 +125,41 @@ internal class Program
                     // var message = $"${result.Length}\r\n{result}\r\n";
                     lock (_cache)
                     {
-
-                        if (_cache.ContainsKey(indexKeyValue))
+                        if (cacheTime.ContainsKey(indexKeyValue))
                         {
-                            var value = (string)_cache[indexKeyValue];
-                            if (stream.CanWrite)
-                                stream.Write(Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n"), 0, Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n").Length);
+                            if (cacheTime[indexKeyValue] < DateTime.Now)
+                            {
+
+                                DateTime removedPeriod;
+                                object removeKey;
+                                cacheTime.Remove(indexKeyValue, out removedPeriod);
+                                _cache.Remove(indexKeyValue, out removeKey);
+                                stream.Write(Encoding.ASCII.GetBytes("$-1\r\n"), 0, Encoding.ASCII.GetBytes("$-1\r\n").Length);
+                            }
+                            else
+                            {
+                                var value = (string)_cache[indexKeyValue];
+                                if (stream.CanWrite)
+                                    stream.Write(Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n"), 0, Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n").Length);
+
+                            }
 
                         }
                         else
+                        {
+                             
+                                if (_cache.ContainsKey(indexKeyValue))
+                                {
+                                    var value = (string)_cache[indexKeyValue];
+                                    if (stream.CanWrite)
+                                        stream.Write(Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n"), 0, Encoding.ASCII.GetBytes($"${value.Length}\r\n{value}\r\n").Length);
 
-                            //stream.Write(Encoding.ASCII.GetBytes("-Error invalid Key\r\n"), 0, Encoding.ASCII.GetBytes("-Error invalid Key\r\n").Length); 
-                            stream.Write(Encoding.ASCII.GetBytes("$-1\r\n"), 0, Encoding.ASCII.GetBytes("$-1\r\n").Length);
+                                }
+                                else
+
+                                    //stream.Write(Encoding.ASCII.GetBytes("-Error invalid Key\r\n"), 0, Encoding.ASCII.GetBytes("-Error invalid Key\r\n").Length); 
+                                    stream.Write(Encoding.ASCII.GetBytes("$-1\r\n"), 0, Encoding.ASCII.GetBytes("$-1\r\n").Length);
+                        }
                     }
                     Task.Delay(TimeSpan.FromSeconds(500));
                 }
